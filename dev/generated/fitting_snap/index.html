@@ -1,32 +1,30 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Fitting SNAP · LAMMPS.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://cesmix-mit.github.io/LAMMPS.jl/generated/fitting_snap/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">LAMMPS.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../snap/">Basic SNAP</a></li><li class="is-active"><a class="tocitem" href>Fitting SNAP</a><ul class="internal"><li><a class="tocitem" href="#Install-and-import-dependencies"><span>Install and import dependencies</span></a></li><li><a class="tocitem" href="#Estimation-of-the-SNAP-coefficients"><span>Estimation of the SNAP coefficients</span></a></li><li class="toplevel"><a class="tocitem" href="#Calculate-A-using-snap.jl"><span>Calculate <span>$A$</span> using <code>snap.jl</code></span></a></li><li class="toplevel"><a class="tocitem" href="#Calculate-b"><span>Calculate b</span></a></li><li><a class="tocitem" href="#Calculate-the-optimal-solution"><span>Calculate the optimal solution</span></a></li><li><a class="tocitem" href="#Check-results"><span>Check results</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Fitting SNAP</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Fitting SNAP</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cesmix-mit/LAMMPS.jl/blob/master/examples/fitting_snap.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Fitting-SNAP-using-GaN-data"><a class="docs-heading-anchor" href="#Fitting-SNAP-using-GaN-data">Fitting SNAP using GaN data</a><a id="Fitting-SNAP-using-GaN-data-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-SNAP-using-GaN-data" title="Permalink"></a></h1><p>This example:</p><ul><li>Uses the atomic positions in the folder <code>DATA</code></li><li>Generates surrogate DFT data based on the GaN model presented in <code>10.1088/1361-648x/ab6cbe</code></li><li>Uses <code>snap.jl</code> and 80% of the GaN data to create the matrix A. The matrix is generated only with the energy block.</li><li>Uses 80% of the GaN data to create the vector b. The reference energy (<span>$E_{ref}$</span>) is assumed to be zero.</li><li>Uses backslash to fit the parameters β, thus, solves A β = b</li><li>Uses 20% of the GaN data and the bispectrum components provided by <code>snap.jl</code> to validate the fitting.</li><li>The relative error computed during the validation is &lt; ~5%.</li></ul><p>ToDo&#39;s:</p><ul><li>Check if the GaN model is correct.</li><li>Calculate reference energy (<span>$E_{ref}$</span>).</li><li>Check ill-conditioned system.</li><li>Check the consistency of the notation.</li></ul><h2 id="Install-and-import-dependencies"><a class="docs-heading-anchor" href="#Install-and-import-dependencies">Install and import dependencies</a><a id="Install-and-import-dependencies-1"></a><a class="docs-heading-anchor-permalink" href="#Install-and-import-dependencies" title="Permalink"></a></h2><p>First let&#39;s make sure we have all required packages installed</p><pre><code class="language-julia">using Pkg
-pkg&quot;add LAMMPS&quot;</code></pre><p>We start off by importing the necessary packages</p><pre><code class="language-julia">using LAMMPS
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Fitting SNAP · LAMMPS.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link rel="canonical" href="https://cesmix-mit.github.io/LAMMPS.jl/generated/fitting_snap/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">LAMMPS.jl</a></span></div><form class="docs-search" action="../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../">Home</a></li><li><span class="tocitem">Examples</span><ul><li><a class="tocitem" href="../snap/">Basic SNAP</a></li><li class="is-active"><a class="tocitem" href>Fitting SNAP</a><ul class="internal"><li><a class="tocitem" href="#Install-and-import-dependencies"><span>Install and import dependencies</span></a></li><li><a class="tocitem" href="#Estimation-of-the-SNAP-coefficients"><span>Estimation of the SNAP coefficients</span></a></li><li class="toplevel"><a class="tocitem" href="#Calculate-A-using-snap.jl"><span>Calculate <span>$A$</span> using <code>snap.jl</code></span></a></li><li class="toplevel"><a class="tocitem" href="#Calculate-y"><span>Calculate <span>$y$</span></span></a></li><li><a class="tocitem" href="#Calculate-the-optimal-solution"><span>Calculate the optimal solution</span></a></li><li><a class="tocitem" href="#Check-results"><span>Check results</span></a></li></ul></li></ul></li><li><a class="tocitem" href="../../api/">API</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Examples</a></li><li class="is-active"><a href>Fitting SNAP</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Fitting SNAP</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/cesmix-mit/LAMMPS.jl/blob/master/examples/fitting_snap.jl" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Fitting-SNAP-using-GaN-data"><a class="docs-heading-anchor" href="#Fitting-SNAP-using-GaN-data">Fitting SNAP using GaN data</a><a id="Fitting-SNAP-using-GaN-data-1"></a><a class="docs-heading-anchor-permalink" href="#Fitting-SNAP-using-GaN-data" title="Permalink"></a></h1><p>This example:</p><ul><li>Uses the atomic positions in the folder <code>example_GaN_data</code></li><li>Generates surrogate DFT data based on the GaN model presented in <code>10.1088/1361-648x/ab6cbe</code></li><li>Uses <code>snap.jl</code> and 80% of the GaN data to create the matrix A. The matrix is generated only with the energy block.</li><li>Uses 80% of the GaN data to create the vector b. The reference energy (<span>$E_{\rm ref}$</span>) is assumed to be zero.</li><li>Uses backslash to fit the parameters <span>$\boldsymbol{\beta}$</span>, thus, solves <span>$\mathbf{A \cdot \boldsymbol{\beta}=y}$</span></li><li>Uses 20% of the GaN data and the bispectrum components provided by <code>snap.jl</code>and the fitted parameters <span>$\boldsymbol{\beta}$</span> to validate the fitting.</li><li>The error computed during the validation is &lt; ~5%.</li></ul><p>TODO:</p><ul><li>Check if the GaN model is correct.</li><li>Calculate reference energy (<span>$E_{\rm ref}$</span>).</li><li>Check ill-conditioned system.</li></ul><h2 id="Install-and-import-dependencies"><a class="docs-heading-anchor" href="#Install-and-import-dependencies">Install and import dependencies</a><a id="Install-and-import-dependencies-1"></a><a class="docs-heading-anchor-permalink" href="#Install-and-import-dependencies" title="Permalink"></a></h2><p>First let&#39;s make sure we have all required packages installed</p><pre><code class="language-julia hljs">using Pkg
+pkg&quot;add LAMMPS&quot;</code></pre><p>We start off by importing the necessary packages</p><pre><code class="language-julia hljs">using LAMMPS
 using LinearAlgebra: norm, pinv
-using Printf</code></pre><h2 id="Estimation-of-the-SNAP-coefficients"><a class="docs-heading-anchor" href="#Estimation-of-the-SNAP-coefficients">Estimation of the SNAP coefficients</a><a id="Estimation-of-the-SNAP-coefficients-1"></a><a class="docs-heading-anchor-permalink" href="#Estimation-of-the-SNAP-coefficients" title="Permalink"></a></h2><p>The choice of the coefficients <span>$\mathbf{\overline{b}}=(\beta_0, \overline{\beta})$</span> is based on a system of linear equations which considers a large number of atomic configurations. The matrix formulation for this system <span>$\mathbf{A \cdot \overline{b}=y}$</span> defined in the following equation (see 10.1016/j.jcp.2014.12.018):</p><p class="math-container">\[\begin{equation}
-   \label{eq:matrix}
+using Printf</code></pre><h2 id="Estimation-of-the-SNAP-coefficients"><a class="docs-heading-anchor" href="#Estimation-of-the-SNAP-coefficients">Estimation of the SNAP coefficients</a><a id="Estimation-of-the-SNAP-coefficients-1"></a><a class="docs-heading-anchor-permalink" href="#Estimation-of-the-SNAP-coefficients" title="Permalink"></a></h2><p>The choice of the coefficients <span>$\boldsymbol{\beta}=(\beta_0^1, \tilde{\beta}^1, \dots, \beta_0^l, \tilde{\beta}^l)$</span> is based on a system of linear equations which considers a large number of atomic configurations and <span>$l$</span> atom types. The matrix formulation for this system <span>$\mathbf{A \cdot \boldsymbol{\beta}=y}$</span> is defined in the following equations (see 10.1016/j.jcp.2014.12.018):</p><p class="math-container">\[\begin{equation*}
    \mathbf{A}=
    \begin{pmatrix}
-       \vdots &amp;  &amp;  &amp; \\
-       N_l &amp; \sum_{i=1}^{N_l} B_1^i &amp; \dots &amp; \sum_{i=1}^{N_l} B_k^i \\
-       \vdots &amp;  &amp;  &amp; \\
-       0 &amp; -\sum_{i=1}^{N_l} \frac{\partial B_1^i}{\partial r_j^{\alpha}} &amp; \dots &amp; -\sum_{i=1}^{N_l} \frac{\partial B_k^i}{\partial r_j^{\alpha}} \\
-       \vdots &amp;  &amp;  &amp; \\
-       0 &amp; - \sum_{j=1}^{N_l} r^j_{\alpha} \sum_{i=1}^{N_l} \frac{\partial B_1^i}{\partial r_j^{\beta}} &amp; \dots &amp; - \sum_{j=1}^{N_1} r^j_{\alpha} \sum_{i=1}^{N_1} \frac{\partial B_k^i}{\partial r_j^{\beta}} \\
-       \vdots &amp;  &amp;  &amp; \\
-   \end{pmatrix}  \begin{pmatrix}
-                   \beta_0 \\
-                   \overline{\beta}
-               \end{pmatrix} = \begin{pmatrix}
-                                   \vdots \\
-                                   E^l_{\rm qm} -  E^l_{\rm ref} \\
-                                   \vdots \\\\
-                                   F^{l,j,\alpha}_{\rm qm} - F^{l,j,\alpha}_{\rm ref} \\
-                                   \vdots \\
-                                   W_{\rm qm}^{l,\alpha,\beta} - W_{\rm ref}^{l,\alpha,\beta} \\
-                                   \vdots \\
-                                \end{pmatrix}
-\end{equation}\]</p><p>The indexes <span>$\alpha, \beta = 1,2,3$</span> depict the <span>$x$</span>, <span>$y$</span> and <span>$z$</span> spatial component, <span>$j$</span> is an individual atom, and <span>$l$</span> a particular configuration. All atoms in each configuration are considered. The number of atoms in the configuration <span>$l$</span> is <span>$N_l$</span>.</p><h1 id="Calculate-A-using-snap.jl"><a class="docs-heading-anchor" href="#Calculate-A-using-snap.jl">Calculate <span>$A$</span> using <code>snap.jl</code></a><a id="Calculate-A-using-snap.jl-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-A-using-snap.jl" title="Permalink"></a></h1><p>This example only fits the energy, thus, the first block of the matrix A.</p><pre><code class="language-julia">include(joinpath(dirname(pathof(LAMMPS)), &quot;..&quot;, &quot;examples&quot;, &quot;snap.jl&quot;))
-A</code></pre><pre class="documenter-example-output">48×62 Matrix{Float64}:
+       \vdots &amp;  &amp;  &amp; &amp; &amp; &amp; &amp; &amp; \\
+       N_{s_1} &amp; \sum_{i=1}^{N_{s_1}} B_1^i &amp; \dots &amp; \sum_{i=1}^{N_{s_1}} B_k^i  &amp; \dots &amp; N_{s_L} &amp; \sum_{i=1}^{N_{s_L}} B_1^i &amp; \dots &amp; \sum_{i=1}^{N_{s_L}} B_k^i\\
+       \vdots &amp;  &amp;  &amp; &amp; &amp; &amp; &amp; &amp; \\
+       0 &amp; -\sum_{i=1}^{N_{s_1}} \frac{\partial B_1^i}{\partial r_j^{\alpha}} &amp; \dots &amp; -\sum_{i=1}^{N_{s_1}} \frac{\partial B_k^i}{\partial r_j^{\alpha}} &amp; \dots &amp;  0 &amp; -\sum_{i=1}^{N_{s_l}} \frac{\partial B_1^i}{\partial r_j^{\alpha}} &amp; \dots &amp; -\sum_{i=1}^{N_{s_l}} \frac{\partial B_k^i}{\partial r_j^{\alpha}} \\
+       \vdots &amp;  &amp;  &amp; &amp; &amp; &amp; &amp; &amp; \\
+       0 &amp; - \sum_{j=1}^{N_{s_1}} r^j_{\alpha} \sum_{i=1}^{N_{s_1}} \frac{\partial B_1^i}{\partial r_j^{\beta}} &amp; \dots &amp; - \sum_{j=1}^{N_{s_1}} r^j_{\alpha} \sum_{i=1}^{N_{s_1}} \frac{\partial B_k^i}{\partial r_j^{\beta}} &amp; \dots &amp; 0 &amp; - \sum_{j=1}^{N_{s_l}} r^j_{\alpha} \sum_{i=1}^{N_{s_l}} \frac{\partial B_1^i}{\partial r_j^{\beta}} &amp; \dots &amp; - \sum_{j=1}^{N_{s_l}} r^j_{\alpha} \sum_{i=1}^{N_{s_l}} \frac{\partial B_k^i}{\partial r_j^{\beta}}\\
+       \vdots &amp;  &amp;  &amp; &amp; &amp; &amp; &amp; &amp; \\
+   \end{pmatrix}
+\end{equation*}\]</p><p>The indexes <span>$\alpha, \beta = 1,2,3$</span> depict the <span>$x$</span>, <span>$y$</span> and <span>$z$</span> spatial component, <span>$j$</span> is an individual atom, and <span>$s$</span> a particular configuration. All atoms in each configuration are considered. The number of atoms of type <span>$m$</span> in the configuration <span>$s$</span> is <span>$N_{s_m}$</span>.</p><p>The RHS of the linear system is computed as:</p><p class="math-container">\[\begin{equation*}
+ \mathbf{y}=  \begin{pmatrix}
+   \vdots \\
+  E^s_{\rm qm} -  E^s_{\rm ref} \\
+  \vdots \\\\
+  F^{s,j,\alpha}_{\rm qm} - F^{s,j,\alpha}_{\rm ref} \\
+  \vdots \\
+  W_{\rm qm}^{s,\alpha,\beta} - W_{\rm ref}^{s,\alpha,\beta} \\
+  \vdots \\
+   \end{pmatrix}
+\end{equation*}\]</p><h1 id="Calculate-A-using-snap.jl"><a class="docs-heading-anchor" href="#Calculate-A-using-snap.jl">Calculate <span>$A$</span> using <code>snap.jl</code></a><a id="Calculate-A-using-snap.jl-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-A-using-snap.jl" title="Permalink"></a></h1><p>This example only fits the energy, thus, the first block of the matrix A.</p><pre><code class="language-julia hljs">include(joinpath(dirname(pathof(LAMMPS)), &quot;..&quot;, &quot;examples&quot;, &quot;snap.jl&quot;))
+A</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">48×62 Matrix{Float64}:
  96.0  1268.56  179.99    95.7371  …  2456.8   505.481  1180.76  588.742
  96.0  1232.05  180.321   98.2362     2471.63  485.186  1121.6   628.232
  96.0  1233.47  181.965   99.2062     2464.54  493.966  1129.54  622.432
@@ -46,7 +44,16 @@ A</code></pre><pre class="documenter-example-output">48×62 Matrix{Float64}:
  96.0  1234.41  180.926   98.7391     2476.5   489.552  1129.21  625.961
  96.0  1238.05  179.305   97.9326  …  2466.85  487.825  1121.67  631.409
  96.0  1241.42  181.616   99.2904     2464.63  488.513  1126.73  620.722
- 96.0  1245.59  179.955   97.9024     2465.35  484.987  1124.75  629.313</pre><h1 id="Calculate-b"><a class="docs-heading-anchor" href="#Calculate-b">Calculate b</a><a id="Calculate-b-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-b" title="Permalink"></a></h1><p>A molecular mechanics model for the interaction of gallium and nitride is used to generate surrogate DFT data. DOI: 10.1088/1361-648x/ab6cbe. Note: this is a work in progress, this model should be checked.</p><pre><code class="language-julia">const N = N1 + N2
+ 96.0  1245.59  179.955   97.9024     2465.35  484.987  1124.75  629.313</code></pre><h1 id="Calculate-y"><a class="docs-heading-anchor" href="#Calculate-y">Calculate <span>$y$</span></a><a id="Calculate-y-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-y" title="Permalink"></a></h1><p>A molecular mechanics model for the interaction of gallium and nitride is used to generate surrogate DFT data (see 10.1088/1361-648x/ab6cbe). The total potential energy is computed for each configuration</p><p class="math-container">\[E = \sum_{i \lt j;  r_{i,j} \leq rcut } E_{GaN}(r_{i,j}) \  \text{ where } \\
+
+E_{GaN}(r_{i,j}) =
+\left\{
+   \begin{array}{ll}
+       E_{C}(r_{i,j}) + E_{LJ}(r_{i,j}, \epsilon_{Ga,Ga}, \sigma_{Ga,Ga})  &amp; \mbox{if both atoms are Ga} \\
+       E_{C}(r_{i,j}) + E_{LJ}(r_{i,j}, \epsilon_{N,N}, \sigma_{N,N})  &amp; \mbox{if both atoms are N} \\
+       E_{C}(r_{i,j}) + E_{BM}(r_{i,j}, A_{Ga,N}, \rho_{Ga,N})  &amp; \mbox{if one atom is Ga and the other is N}\\
+   \end{array}
+\right.\]</p><p>Note: this is a work in progress, this model should be checked.</p><pre><code class="language-julia hljs">const N = N1 + N2
 const M1 = M
 const M2 = 61
 
@@ -59,10 +66,12 @@ const ρ_Ga_N = 0.435
 const q_Ga = 3.0
 const q_N = -3.0
 const ε0 = 55.26349406 # e2⋅GeV−1⋅fm−1 ToDo: check this
-const E_ref = 0.
+const E_ref = zeros(M1)
 E_LJ(r, ε = 1.0, σ = 1.0) = 4.0 * ε * ((σ / norm(r))^12 - (σ / norm(r))^6)
 E_BM(r, A = 1.0, ρ = 1.0) = A * exp(-norm(r) / ρ)
-E_C(r) = q_Ga * q_N / (4.0 * π * ε0 * norm(r))</code></pre><pre class="documenter-example-output">E_C (generic function with 1 method)</pre><p>Calculate total potential energy for each configuration</p><pre><code class="language-julia">function read_atomic_conf(m, N)
+E_C(r) = q_Ga * q_N / (4.0 * π * ε0 * norm(r))
+
+function read_atomic_conf(m, N)
     rs = []
     open(joinpath(DATA, string(m), &quot;DATA&quot;)) do f
         for i = 1:23
@@ -77,16 +86,9 @@ E_C(r) = q_Ga * q_N / (4.0 * π * ε0 * norm(r))</code></pre><pre class="documen
         end
     end
     return rs
-end</code></pre><pre class="documenter-example-output">read_atomic_conf (generic function with 1 method)</pre><p class="math-container">\[E = \sum_{i \neq j;  r_{i,j} \leq rcut } E_{GaN}(r_{i,j}) \  where  \\
+end
 
-E_{GaN}(r_{i,j}) =
-\left\{
-   \begin{array}{ll}
-       E_{C}(r_{i,j}) + E_{LJ}(r_{i,j}, \epsilon_{Ga,Ga}, \sigma_{Ga,Ga})  &amp; \mbox{if both particles are Ga} \\
-       E_{C}(r_{i,j}) + E_{LJ}(r_{i,j}, \epsilon_{N,N}, \sigma_{N,N})  &amp; \mbox{if both particles are N} \\
-       E_{C}(r_{i,j}) + E_{BM}(r_{i,j}, A_{Ga,N}, \rho_{Ga,N})  &amp; \mbox{if one particle is Ga and the other is N}\\
-   \end{array}
-\right.\]</p><pre><code class="language-julia">function calc_tot_energy(rcut, rs, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)
+function calc_tot_energy(rcut, rs, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)
     E_tot_acc = 0.0
     for i = 1:N
         for j = i:N
@@ -103,17 +105,17 @@ E_{GaN}(r_{i,j}) =
         end
     end
     return E_tot_acc
-end</code></pre><pre class="documenter-example-output">calc_tot_energy (generic function with 1 method)</pre><p>Calculate the vector <span>$b$</span> using the DFT data and <span>$E_{ref}$</span></p><pre><code class="language-julia">function calc_b(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)
-    b = zeros(M1)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">calc_tot_energy (generic function with 1 method)</code></pre><p>Vector <span>$y$</span> is calculated using the DFT data and <span>$E_{\rm ref}$</span></p><pre><code class="language-julia hljs">function calc_y(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N, E_ref)
+    y = zeros(M1)
     for m = 1:M1
         rs = read_atomic_conf(m, N)
-        b[m] = calc_tot_energy(rcut, rs, N, ε_Ga_Ga, σ_Ga_Ga,
-                               ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)
+        y[m] = calc_tot_energy(rcut, rs, N, ε_Ga_Ga, σ_Ga_Ga,
+                               ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N) - E_ref[m]
     end
-    return b
+    return y
 end
 
-b = calc_b(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)</code></pre><pre class="documenter-example-output">48-element Vector{Float64}:
+y = calc_y(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N, E_ref)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">48-element Vector{Float64}:
  1722.4498771523417
  1677.2635491164112
  1711.3148873863208
@@ -133,9 +135,9 @@ b = calc_b(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)</co
  1726.9880294606958
  1705.9038135458254
  1697.3739427062326
- 1715.5343234240943</pre><h2 id="Calculate-the-optimal-solution"><a class="docs-heading-anchor" href="#Calculate-the-optimal-solution">Calculate the optimal solution</a><a id="Calculate-the-optimal-solution-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-the-optimal-solution" title="Permalink"></a></h2><p>The optimal solution <span>$\widehat{\mathbf{b}}$</span> is, thus:</p><p class="math-container">\[\begin{equation*}
-    \widehat{\mathbf{b}} = \mathrm{argmin}_{\mathbf{\overline{b}}} ||\mathbf{A \overline{b} -y}||^2 = \mathbf{A^{-1} y}
-\end{equation*}\]</p><pre><code class="language-julia">β = A \ b</code></pre><pre class="documenter-example-output">62-element Vector{Float64}:
+ 1715.5343234240943</code></pre><h2 id="Calculate-the-optimal-solution"><a class="docs-heading-anchor" href="#Calculate-the-optimal-solution">Calculate the optimal solution</a><a id="Calculate-the-optimal-solution-1"></a><a class="docs-heading-anchor-permalink" href="#Calculate-the-optimal-solution" title="Permalink"></a></h2><p>The optimal solution <span>$\widehat{\mathbf{\beta}}$</span> is, thus:</p><p class="math-container">\[\begin{equation*}
+    \widehat{\mathbf{\beta}} = \mathrm{argmin}_{\mathbf{\beta}} ||\mathbf{A \cdot \boldsymbol{\beta} - y}||^2 = \mathbf{A^{-1} \cdot y}
+\end{equation*}\]</p><pre><code class="language-julia hljs">β = A \ y</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">62-element Vector{Float64}:
    3.1831789753899153
    0.8023162543429092
  -14.628057637951823
@@ -155,8 +157,8 @@ b = calc_b(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)</co
  -30.938195928688067
   17.863562893635265
   48.21875557473935
- -29.305193438219145</pre><h2 id="Check-results"><a class="docs-heading-anchor" href="#Check-results">Check results</a><a id="Check-results-1"></a><a class="docs-heading-anchor-permalink" href="#Check-results" title="Permalink"></a></h2><p>The local energy can be decomposed into separate contributions for each atom. SNAP energy can be written in terms of the bispectrum components of the atoms and a set of coefficients. <span>$K$</span> components of the bispectrum are considered so that <span>$\mathbf{B}^{i}=\{ B^i_1, \dots, B_K^i\}$</span> for each atom <span>$i$</span>, whose SNAP energy is computed as follows:</p><p class="math-container">\[   E^i_{\rm SNAP}(\mathbf{B}^i) = \beta_0^{\alpha_i} + \sum_{k=1}^K \beta_k^{\alpha_i} B_k^i =  \beta_0^{\alpha_i} + \overline{\beta} \cdot \mathbf{B}^i\]</p><p>where <span>$\alpha_i$</span> depends on the atom type.</p><pre><code class="language-julia">function calc_fitted_tot_energy(path, β, ncoeff, N1, N)
-    # Calculate b
+ -29.305193438219145</code></pre><h2 id="Check-results"><a class="docs-heading-anchor" href="#Check-results">Check results</a><a id="Check-results-1"></a><a class="docs-heading-anchor-permalink" href="#Check-results" title="Permalink"></a></h2><p>The local energy can be decomposed into separate contributions for each atom. SNAP energy can be written in terms of the bispectrum components of the atoms and a set of coefficients. <span>$K$</span> components of the bispectrum are considered so that <span>$\mathbf{B}^{i}=\{ B^i_1, \dots, B_K^i\}$</span> for each atom <span>$i$</span>, whose SNAP energy is computed as follows:</p><p class="math-container">\[   E^i_{\rm SNAP}(\mathbf{B}^i) = \beta_0^{\alpha_i} + \sum_{k=1}^K \beta_k^{\alpha_i} B_k^i =  \beta_0^{\alpha_i} + \boldsymbol{\tilde{\beta}}^{\alpha_i} \cdot \mathbf{B}^i\]</p><p>where <span>$\alpha_i$</span> depends on the atom type.</p><pre><code class="language-julia hljs">function calc_fitted_tot_energy(path, β, ncoeff, N1, N)
+    # Calculate y
     lmp = LMP([&quot;-screen&quot;,&quot;none&quot;])
     bs = run_snap(lmp, path, rcut, twojmax)
 
@@ -179,9 +181,7 @@ b = calc_b(rcut, M1, N, ε_Ga_Ga, σ_Ga_Ga, ε_N_N, σ_N_N, A_Ga_N, ρ_Ga_N)</co
     end
     command(lmp, &quot;clear&quot;)
     return E_tot_acc
-end
-
-@printf(&quot;Potential Energy, Fitted Potential Energy, Error (%%)\n&quot;)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">calc_fitted_tot_energy (generic function with 1 method)</code></pre><p>Comparison between the potential energy calculated based on the DFT data, and the SNAP potential energy calculated based on the bispectrum components provided by <span>$snap.jl$</span> and the fitted coefficients <span>$\mathbf{\beta}$</span>.</p><pre><code class="language-julia hljs">@printf(&quot;Potential Energy, Fitted Potential Energy, Error (%%)\n&quot;)
 for m = M1+1:M2
     path = joinpath(DATA, string(m), &quot;DATA&quot;)
     rs = read_atomic_conf(m, N)
@@ -189,7 +189,7 @@ for m = M1+1:M2
     E_tot_fit = calc_fitted_tot_energy(path, β, ncoeff, N1, N)
     @printf(&quot;%0.2f, %0.2f, %0.2f\n&quot;, E_tot, E_tot_fit,
             abs(E_tot - E_tot_fit) / E_tot * 100.)
-end</code></pre><pre class="documenter-example-output">Potential Energy, Fitted Potential Energy, Error (%)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Potential Energy, Fitted Potential Energy, Error (%)
 1695.02, 1721.56, 1.57
 1716.77, 1625.86, 5.30
 1727.48, 1739.46, 0.69
@@ -202,4 +202,4 @@ end</code></pre><pre class="documenter-example-output">Potential Energy, Fitted 
 1732.92, 1748.40, 0.89
 1687.87, 1692.51, 0.27
 1726.56, 1756.36, 1.73
-1685.35, 1747.74, 3.70</pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../snap/">« Basic SNAP</a><a class="docs-footer-nextpage" href="../../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.3 on <span class="colophon-date" title="Sunday 18 July 2021 23:07">Sunday 18 July 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+1685.35, 1747.74, 3.70</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../snap/">« Basic SNAP</a><a class="docs-footer-nextpage" href="../../api/">API »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.4 on <span class="colophon-date" title="Wednesday 21 July 2021 06:01">Wednesday 21 July 2021</span>. Using Julia version 1.6.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
